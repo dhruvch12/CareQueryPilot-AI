@@ -1,0 +1,267 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CareQueryPilot AI</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <header class="topbar">
+     
+<div class="account-actions">
+  <span id="companyLabel" class="company-label"></span>
+  <button id="logoutBtn" class="logout-btn" type="button">
+    <span aria-hidden="true">↪</span> Logout
+  </button>
+</div>
+
+        <div class="brand">
+            <div class="logo">C</div>
+            <div>
+                <h1>CareQueryPilot <span>AI</span></h1>
+                <p>Customer Support Intelligence</p>
+            </div>
+        </div>
+        <div class="status"><span></span> AI System Ready</div>
+    </header>
+
+    <main class="container">
+        <section class="welcome">
+            <p class="eyebrow">SUPPORT OPERATIONS</p>
+            <h2>Resolve customer issues <span>smarter.</span></h2>
+            <p>Analyze tickets, detect urgency, route requests, and generate helpful replies.</p>
+        </section>
+
+        
+<section class="kpi-grid">
+    <div class="kpi-card">
+        <span class="kpi-icon">▤</span>
+        <p>Total Tickets Analyzed</p>
+        <h2 id="totalTickets">0</h2>
+        <small>During this session</small>
+    </div>
+    <div class="kpi-card">
+        <span class="kpi-icon">⚑</span>
+        <p>High-Priority Tickets</p>
+        <h2 id="highTickets">0</h2>
+        <small>Require attention</small>
+    </div>
+    <div class="kpi-card">
+        <span class="kpi-icon">◷</span>
+        <p>Average Urgency</p>
+        <h2 id="avgUrgency">0.0/10</h2>
+        <small>Across analyzed tickets</small>
+    </div>
+    <div class="kpi-card">
+        <span class="kpi-icon">↗</span>
+        <p>Human Escalations</p>
+        <h2 id="escalations">0</h2>
+        <small>Review recommended</small>
+    </div>
+</section>
+
+
+        <section class="dashboard">
+            <div class="panel input-panel">
+                <div class="panel-heading">
+                    <div>
+                        <p class="eyebrow">NEW TICKET</p>
+                        <h3>Analyze a customer message</h3>
+                    </div>
+                    <span class="ticket-icon">✦</span>
+                </div>
+
+                <label for="ticket">Customer message</label>
+                <textarea id="ticket" rows="7" placeholder="Example: I was charged twice for my subscription and need a refund urgently..."></textarea>
+
+                <div class="examples">
+                    <span>Try an example:</span>
+                    <button class="example" data-message="I was charged twice for my subscription. Please refund the extra payment.">Billing</button>
+                    <button class="example" data-message="The application crashes every time I try to upload a file.">Technical</button>
+                    <button class="example" data-message="I cannot log in because my account is locked. Please help urgently.">Account</button>
+                </div>
+
+                <button id="analyzeBtn" class="primary-btn">
+                    <span>✦</span> Analyze Ticket
+                </button>
+                <p id="error" class="error"></p>
+            </div>
+
+            <div class="panel results-panel">
+                <div class="panel-heading">
+                    <div>
+                        <p class="eyebrow">AI INSIGHTS</p>
+                        <h3>Ticket analysis</h3>
+                    </div>
+                    <span id="mode" class="tag">Waiting</span>
+                </div>
+
+                <div id="emptyState" class="empty-state">
+                    <div class="empty-icon">✦</div>
+                    <h3>Your insights will appear here</h3>
+                    <p>Enter a customer message and click Analyze Ticket to see the classification and recommended action.</p>
+                </div>
+
+                <div id="results" hidden>
+                    <div class="metrics">
+                        <div class="metric">
+                            <span>Priority</span>
+                            <strong id="priority">—</strong>
+                        </div>
+                        <div class="metric">
+                            <span>Urgency</span>
+                            <strong id="urgency">—</strong>
+                        </div>
+                        <div class="metric">
+                            <span>Department</span>
+                            <strong id="department">—</strong>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <div class="section-title">
+                            <h4>Routing recommendation</h4>
+                            <span>01</span>
+                        </div>
+                        <p id="route" class="route">—</p>
+                        <p class="muted">Classification confidence: <strong id="confidence">—</strong></p>
+                    </div>
+
+                    <div class="probabilities">
+                        <div class="probability">
+                            <div><span>Refund probability</span><strong id="refund">—</strong></div>
+                            <div class="bar"><span id="refundBar"></span></div>
+                        </div>
+                        <div class="probability">
+                            <div><span>Human review probability</span><strong id="human">—</strong></div>
+                            <div class="bar"><span id="humanBar"></span></div>
+                        </div>
+                    </div>
+
+                    <div class="section reply-section">
+                        <div class="section-title">
+                            <h4>Suggested customer reply</h4>
+                            <button id="copyBtn" class="copy-btn">Copy reply</button>
+                        </div>
+                        <p id="reply" class="reply"></p>
+                    </div>
+
+                    <p id="notice" class="notice" hidden></p>
+                </div>
+            </div>
+        </section>
+        
+
+<section class="panel import-panel">
+    <div class="panel-heading">
+        <div>
+            <p class="eyebrow">DATA OPERATIONS</p>
+            <h3>Import company tickets</h3>
+        </div>
+        <span class="ticket-icon">⇧</span>
+    </div>
+
+    <p class="muted">
+        Upload a CSV export containing message, description, or subject.
+        The current importer uses local triage rules.
+    </p>
+
+    <div class="history-tools">
+        <input id="csvFile" type="file" accept=".csv" aria-label="Choose CSV file">
+        <button id="importBtn" class="primary-btn import-button">
+            Import tickets
+        </button>
+    </div>
+
+    <p id="importStatus" class="notice" role="status"></p>
+</section>
+
+<section class="panel insights-panel">
+    <div class="panel-heading">
+        <div>
+            <p class="eyebrow">BUSINESS INTELLIGENCE</p>
+            <h3>Company-wide ticket insights</h3>
+        </div>
+        <button id="refreshInsights" class="copy-btn">Refresh insights</button>
+    </div>
+
+    <div id="departmentInsights" class="department-insights">
+        <p class="muted">Load insights to see your ticket distribution.</p>
+    </div>
+
+    <h4 class="queue-heading">Recommended priority queue</h4>
+    <div class="table-wrap">
+        <table class="activity-table">
+            <thead>
+                <tr>
+                    <th>Ticket</th>
+                    <th>Department</th>
+                    <th>Priority</th>
+                    <th>Urgency</th>
+                    <th>Human review</th>
+                </tr>
+            </thead>
+            <tbody id="priorityQueue">
+                <tr>
+                    <td colspan="5" class="history-empty">
+                        Click Refresh insights to load the queue.
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+
+
+<section class="panel activity-panel">
+    <div class="panel-heading">
+        <div>
+            <p class="eyebrow">LIVE SESSION ACTIVITY</p>
+            <h3>Recent analyzed tickets</h3>
+        </div>
+        <span class="tag">Latest first</span>
+    </div>
+
+    
+<div class="history-tools">
+    <input
+        id="historySearch"
+        type="search"
+        placeholder="Search message, department, or priority..."
+        aria-label="Search ticket history"
+    >
+    <button id="searchHistoryBtn" class="copy-btn">Search</button>
+    <a class="export-btn" href="/api/export.csv">Export CSV ↓</a>
+</div>
+
+
+    <div class="table-wrap">
+        <table class="activity-table">
+            <thead>
+                <tr>
+                    <th>Customer issue</th>
+                    <th>Department</th>
+                    <th>Priority</th>
+                    <th>Urgency</th>
+                    <th>Analysis mode</th>
+                </tr>
+            </thead>
+            <tbody id="ticketHistory">
+                <tr>
+                    <td colspan="5" class="history-empty">
+                        No tickets analyzed yet. Analyze a ticket to begin.
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+
+
+    </main>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>

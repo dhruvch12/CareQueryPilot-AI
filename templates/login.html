@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CareQueryPilot AI | Sign in</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh; display: grid; place-items: center;
+      background: #0b1020; color: #edf2ff;
+      font-family: Arial, sans-serif; padding: 20px;
+    }
+    .card {
+      width: 100%; max-width: 420px; padding: 30px;
+      border: 1px solid #303b55; border-radius: 18px;
+      background: #141c30;
+    }
+    h1 { margin-top: 0; font-size: 25px; }
+    p { color: #aab7d0; line-height: 1.5; }
+    label { display: block; margin: 16px 0 7px; }
+    input {
+      width: 100%; padding: 12px; border-radius: 8px;
+      border: 1px solid #394762; background: #0b1020;
+      color: white; font-size: 15px;
+    }
+    button {
+      width: 100%; margin-top: 20px; padding: 12px;
+      border: 0; border-radius: 8px; background: #7c83ff;
+      color: #080b18; font-weight: bold; cursor: pointer;
+    }
+    .switch { text-align: center; margin-top: 20px; }
+    a { color: #aeb4ff; cursor: pointer; }
+    #status { overflow-wrap: anywhere; }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <h1>CareQueryPilot AI</h1>
+    <p id="subtitle">Sign in to your company's support workspace.</p>
+
+    <form id="authForm">
+      <div id="companyField" hidden>
+        <label for="company">Company name</label>
+        <input id="company" minlength="2" maxlength="100">
+      </div>
+
+      <label for="email">Email</label>
+      <input id="email" type="email" required autocomplete="email">
+
+      <label for="password">Password</label>
+      <input id="password" type="password" required minlength="10"
+             maxlength="128" autocomplete="current-password">
+
+      <button id="submitBtn" type="submit">Sign in</button>
+    </form>
+
+    <p id="status" role="status"></p>
+    <p class="switch">
+      <span id="switchText">New company?</span>
+      <a href="#" id="switchMode">Create an account</a>
+    </p>
+  </main>
+
+  <script>
+    let registering = false;
+
+    const form = document.getElementById("authForm");
+    const companyField = document.getElementById("companyField");
+    const company = document.getElementById("company");
+    const password = document.getElementById("password");
+    const status = document.getElementById("status");
+
+    document.getElementById("switchMode").addEventListener("click", e => {
+      e.preventDefault();
+      registering = !registering;
+      companyField.hidden = !registering;
+      company.required = registering;
+      password.minLength = registering ? 10 : 1;
+      password.autocomplete = registering ? "new-password" : "current-password";
+      document.getElementById("subtitle").textContent = registering
+        ? "Create a private workspace for your company."
+        : "Sign in to your company's support workspace.";
+      document.getElementById("submitBtn").textContent = registering
+        ? "Create company account" : "Sign in";
+      document.getElementById("switchText").textContent = registering
+        ? "Already registered?" : "New company?";
+      document.getElementById("switchMode").textContent = registering
+        ? "Sign in" : "Create an account";
+      status.textContent = "";
+    });
+
+    form.addEventListener("submit", async e => {
+      e.preventDefault();
+      status.textContent = "Please wait...";
+      document.getElementById("submitBtn").disabled = true;
+
+      const payload = {
+        email: document.getElementById("email").value.trim(),
+        password: password.value
+      };
+      if (registering) payload.company_name = company.value.trim();
+
+      try {
+        const response = await fetch(
+          registering ? "/api/auth/register" : "/api/auth/login",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "same-origin",
+            body: JSON.stringify(payload)
+          }
+        );
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.detail || "Unable to sign in.");
+        }
+        window.location.href = "/";
+      } catch (err) {
+        status.textContent = err.message || "Request failed.";
+      } finally {
+        document.getElementById("submitBtn").disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
